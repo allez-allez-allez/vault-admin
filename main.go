@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"reflect"
+
 	log "github.com/Sirupsen/logrus"
 	VaultApi "github.com/hashicorp/vault/api"
 	GoFlags "github.com/jessevdk/go-flags"
 	envconfig "github.com/kelseyhightower/envconfig"
-	"os"
-	"reflect"
 )
 
 // Application options
@@ -18,6 +19,7 @@ type Specification struct {
 	VaultSkipVerify     bool   `envconfig:"VAULT_SKIP_VERIFY" short:"K" long:"skip-verify" description:"Skip Vault TLS certificate verification"`
 	VaultSecretBasePath string `envconfig:"VAULT_SECRET_BASE_PATH" short:"s" long:"vault-secret-base-path" description:"Base secret path, in Vault, to pull secrets for substitution" vdefault:"secret/vault-admin/"`
 	RotateCreds         bool   `short:"r" long:"rotate-creds" description:"Rotates AWS root credentials" vdefault:"false"`
+	Override            bool   `short:"o" long:"override" description:"Override prompt questions, only use it when you are sure about the changes" vdefault:"false"`
 	Debug               bool   `envconfig:"DEBUG" short:"d" long:"debug" description:"Turn on debug logging"`
 	Version             bool   `short:"v" long:"version" description:"Display the version of the tool"`
 	CurrentVersion      string

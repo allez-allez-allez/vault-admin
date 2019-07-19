@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -17,7 +19,7 @@ func configureLDAPAuth(auth authMethod) {
 	additionalConfig := auth.AdditionalConfig.(map[string]interface{})
 	policyMap := additionalConfig["policy_map"].(map[string]interface{})
 
-	// Update polics->ldap_group config
+	// Update policies->ldap_group config
 	ldapPolicyMap := LdapPolicyMap{}
 	getLdapPolicies(ldapPolicyMap, policyMap)
 	configureLdapPolicies(auth.Path, ldapPolicyMap)
@@ -48,7 +50,6 @@ func getLdapPolicies(ldapPolicyMap LdapPolicyMap, policyMap map[string]interface
 }
 
 func configureLdapPolicies(path string, ldapPolicyMap LdapPolicyMap) {
-
 	log.Debug("Writing LDAP Group -> Policy mappings for " + path)
 	for ldap_name, ldapPolicyItem := range ldapPolicyMap {
 
@@ -63,15 +64,22 @@ func configureLdapPolicies(path string, ldapPolicyMap LdapPolicyMap) {
 }
 
 func cleanupLdapPolicies(path string, ldapPolicyMap LdapPolicyMap) {
-	existing_groups, _ := Vault.List("/auth/" + path + "groups")
+	// since vault only return list of groups in lowercase
+	// need to convert ldappolicymap keys to lowercase for comparison
+	var f LdapPolicyMap
+	policyMapconverted := make(LdapPolicyMap, len(f))
+	for k, v := range ldapPolicyMap {
+		policyMapconverted[strings.ToLower(k)] = v
+	}
 
+	existing_groups, _ := Vault.List("/auth/" + path + "groups")
 	for _, v := range existing_groups.Data {
 		switch ldapGroups := v.(type) {
 		case []interface{}:
 			for _, groupArrayValue := range ldapGroups {
 				switch group_name := groupArrayValue.(type) {
 				case string:
-					if _, ok := ldapPolicyMap[group_name]; ok {
+					if _, ok := policyMapconverted[group_name]; ok {
 						log.Debug("LDAP group mapping [" + group_name + "] exists in configuration, no cleanup necessary")
 					} else {
 						log.Info("LDAP group mapping [" + group_name + "] does not exist in configuration, prompting to delete")

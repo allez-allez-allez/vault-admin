@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	log "github.com/Sirupsen/logrus"
-	VaultApi "github.com/hashicorp/vault/api"
 	"io/ioutil"
 	"path/filepath"
+
+	log "github.com/Sirupsen/logrus"
+	VaultApi "github.com/hashicorp/vault/api"
 )
 
 type authMethod struct {

@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 func getJsonFile(path string) (bool, string) {
@@ -192,6 +193,11 @@ func isJSON(s string) bool {
 }
 
 func askForConfirmation(msg string, max int) bool {
+
+	if Spec.Override {
+		log.Warning("'override' flag is set, prompt will automatically results to `yes`")
+		return true
+	}
 
 	if max > 0 {
 		var response string
